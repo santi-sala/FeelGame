@@ -14,16 +14,20 @@ public class Gun : MonoBehaviour
 
     private Vector2 _mousePosition;
     private float _lastFireTime = 0f;
-    
-    private void Update()
+
+    //Animations
+    private static readonly int FIRE_GUN = Animator.StringToHash("Gun_Fire");
+    private Animator _gunAnimator;
+
+    private void Awake()
     {
-        Shoot();
-        RotateGun();
+        _gunAnimator = GetComponent<Animator>();
     }
     private void OnEnable()
     {
         OnShoot += ShootProjectile;
         OnShoot += ResetLastFireTime;
+        OnShoot += GunFireAnimation;
 
     }
 
@@ -31,7 +35,15 @@ public class Gun : MonoBehaviour
     {
         OnShoot -= ShootProjectile;
         OnShoot -= ResetLastFireTime;
+        OnShoot -= GunFireAnimation;
 
+
+    }
+
+    private void Update()
+    {
+        Shoot();
+        RotateGun();
     }
 
     private void Shoot()
@@ -43,7 +55,7 @@ public class Gun : MonoBehaviour
         */
         if (Input.GetMouseButton(0) && Time.time >= _lastFireTime)
         {
-            ShootProjectile();
+            OnShoot?.Invoke();
         }
 
     }
@@ -52,6 +64,11 @@ public class Gun : MonoBehaviour
     {
         Bullet newBullet = Instantiate(_bulletPrefab, _bulletSpawnPoint.position, Quaternion.identity);
         newBullet.Init(_bulletSpawnPoint.position, _mousePosition);
+    }
+
+    private void GunFireAnimation()
+    {
+        _gunAnimator.Play(FIRE_GUN, 0, 0f);
     }
 
     private void ResetLastFireTime()

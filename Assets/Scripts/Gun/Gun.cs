@@ -3,6 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Pool;
+using Cinemachine;
 
 public class Gun : MonoBehaviour
 {
@@ -19,16 +20,21 @@ public class Gun : MonoBehaviour
     //Animations
     private static readonly int FIRE_GUN = Animator.StringToHash("Gun_Fire");
     private Animator _gunAnimator;
+
+    private CinemachineImpulseSource _gunImpulseSource;
     
     private void Awake()
     {
         _gunAnimator = GetComponent<Animator>();
+        _gunImpulseSource = GetComponent<CinemachineImpulseSource>();
     }
     private void OnEnable()
     {
         OnShoot += ShootProjectile;
         OnShoot += ResetLastFireTime;
         OnShoot += GunFireAnimation;
+        OnShoot += GunScreenShake;
+
     }
 
     private void OnDisable()
@@ -36,6 +42,8 @@ public class Gun : MonoBehaviour
         OnShoot -= ShootProjectile;
         OnShoot -= ResetLastFireTime;
         OnShoot -= GunFireAnimation;
+        OnShoot -= GunScreenShake;
+
     }
 
     private void Start()
@@ -58,7 +66,9 @@ public class Gun : MonoBehaviour
         }, bullet => {
             bullet.gameObject.SetActive(false);
         }, bullet => {
-            Destroy(bullet);
+            Debug.Log("Destroyed!");
+            Destroy(bullet.gameObject);
+
         }, false, 20, 40);
     }
 
@@ -92,6 +102,11 @@ public class Gun : MonoBehaviour
     private void GunFireAnimation()
     {
         _gunAnimator.Play(FIRE_GUN, 0, 0f);
+    }
+
+    private void GunScreenShake()
+    {
+        _gunImpulseSource.GenerateImpulse();
     }
 
     private void ResetLastFireTime()
